@@ -17,17 +17,13 @@
 		<link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 		<script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
 		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-		<script>
-		
-		
-		</script>
 	</head>
 	<body>
 		<div class="container">
 			<div class="row col-md-6 col-md-offset-2 custyle">
 			<table class="table table-striped custab">
 			<thead>
-			<a href="" class="btn btn-primary btn-xs pull-right"><b>+</b> Add new categories</a>
+			<input type="button" class="btn btn-primary btn-xs pull-right" id="load" value="+ Load more"/>
 				<tr>
 					<th>No.</th>
 					<th>Name</th>
@@ -35,15 +31,31 @@
 					<th>Company</th>
 				</tr>
 			</thead>
-					<tr>
-						<td>1</td>
-						<td>Akbar</td>
-						<td>123123123123</td>
-						<td>Meong</td>
-					</tr>
+			<tbody id="result">
+			</tbody>
 			</table>
 			</div>
 		</div>
+		<script>
+			let no = 1;
+			let page = 0;
+			
+			$( "#load" ).click(function() {
+				$.get( "v1/shareholders?page="+page, function( data ) {
+					for (let i = 0; i < data.data.length; i++) {
+						let el = document.getElementById("result"); 
+						el.innerHTML = el.innerHTML + 
+						`	<tr>
+								<td>` + (no++) +`.</td>
+								<td>`+ data.data[i].name +`</td>
+								<td>`+ data.data[i].share +`</td>
+								<td>`+ data.data[i].company +`</td>
+							</tr>
+						`
+					}
+				});
+			});
+		</script>
 	</body>
 </html>
 
