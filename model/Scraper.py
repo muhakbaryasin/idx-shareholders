@@ -49,7 +49,7 @@ class WebDriver(Scraper):
 	def __init__(self, url=None, id=None):
 		Scraper.__init__(self, url, id=id)
 		options = Options()
-		options.set_headless(headless=False)
+		options.set_headless(headless=True)
 		
 		if id is None:
 			self.session = webdriver.Firefox(firefox_options=options, executable_path='geckodriver')

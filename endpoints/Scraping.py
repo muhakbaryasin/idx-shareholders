@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 from model.BaseResponse import BaseResponse, resource_fields
 from repo.CompanyRepository import CompanyRepository
+from repo.ShareHolderRepository import ShareHolderRepository
 from model.Scraper import WebDriver
 from time import sleep
 
@@ -16,8 +17,12 @@ class Scraping(Resource):
 		response.status = 'success'
 
 		idx_parser = IdxParser()
-		idx_parser.parse_companies()
-		idx_parser.quit()
+		
+		try:
+			idx_parser.parse_companies()
+		except Exception as e:
+			idx_parser.quit()
+			raise e
 		
 		return response
 
@@ -58,13 +63,14 @@ class IdxParser(object):
 			
 			existing_company = company_repo.get_by_code(emiten_code)
 			
-			if existing_company is not None:
-				company_repo.update(company_entity)
-			else:
-				company_repo.add(company_entity)
+			company = None
 			
-			#self.parseShareHolder(emiten_code, 0, marcap)
-			break
+			if existing_company is not None:
+				company = company_repo.update(existing_company)
+			else:
+				company = company_repo.add(company_entity)
+			
+			self.parseShareHolder(emiten_code, company.id, marcap)
 			sleep(3)
 	
 	
@@ -72,16 +78,26 @@ class IdxParser(object):
 		company_profile_detail_url = 'https://www.idx.co.id/umbraco/Surface/ListedCompany/GetCompanyProfilesDetail?emitenType=s&language=en-us&kodeEmiten='
 		company_profile_detail = self.retrieve_json( company_profile_detail_url + emiten_code )
 		
-		# share_holder_repo = ShareHolderRepository()
+		shareholder_repo = ShareHolderRepository()
 		
 		for each_share_holder in company_profile_detail['PemegangSaham']:
 			shareholder_entity = {}
 			shareholder_entity['company_id'] = company_id
-			shareholder_entity['name'] = each_share_holder['Nama']
+			
+			name = each_share_holder['Nama']
+			shareholder_entity['name'] = name
+			
 			# why cant we just use the Jumlah?
 			#shareholder_entity['share'] = long(each_share_holder['Jumlah'])
 			shareholder_entity['share'] = int( marcap * float(each_share_holder['Persentase']) / 100 )
-			print(shareholder_entity)
+			# print(shareholder_entity)
+			
+			existing_shareholder = shareholder_repo.get_by_name(company_id, name)
+			
+			if existing_shareholder is not None:
+				shareholder_repo.update(existing_shareholder)
+			else:
+				shareholder_repo.add(shareholder_entity)
 		
 	
 	def retrieve_json(self, url):

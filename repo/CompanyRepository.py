@@ -2,7 +2,7 @@ from sqlalchemy import inspect
 from sqlalchemy.orm.collections import InstrumentedList
 from db.session_manager import session_manager
 from db.Company import Company
-
+from datetime import datetime
 
 class CompanyRepository(object):
 	def __dict_to_company__(self, entity):
@@ -19,7 +19,10 @@ class CompanyRepository(object):
 
 	def update(self, entry_update):
 		if type(entry_update) is dict:
-			entry_update = Company(**entity)
+			entry_update.pop('update_date', None)
+			entry_update = Company(**entry_update)
+		
+		entry_update.update_date = datetime.now()
 		
 		with session_manager() as session:
 			entry = session.query(Company).filter(Company.id==entry_update.id).one_or_none() 
@@ -36,6 +39,7 @@ class CompanyRepository(object):
 				setattr(entry, column.key, entry_update.__getattribute__( column.key ))
 			
 			session.commit()
+			session.refresh(entry)
 			
 		return entry
 
