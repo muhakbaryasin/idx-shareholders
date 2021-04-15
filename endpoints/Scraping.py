@@ -71,7 +71,7 @@ class IdxParser(object):
 				company = company_repo.add(company_entity)
 			
 			self.parseShareHolder(emiten_code, company.id, marcap)
-			sleep(3)
+			sleep(1)
 	
 	
 	def parseShareHolder(self, emiten_code, company_id, marcap):

@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_restful import Api
 from endpoints.Scraping import Scraping
 import logging
@@ -21,6 +21,11 @@ handler.setFormatter(
     logging.Formatter("%(asctime)s:%(levelname)s:%(request_id)s - %(message)s"))
 handler.addFilter(RequestIDLogFilter())  # << Add request id contextual filter
 logger.addHandler(handler)
+
+
+@app.route('/')
+def index():
+	return render_template('table.html')
 
 if __name__ == "__main__":
 	app.run(debug=True, host='0.0.0.0', port=5002)
