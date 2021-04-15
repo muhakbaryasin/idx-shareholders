@@ -24,6 +24,7 @@ class Shareholders(Resource):
 		
 		for row in result:
 			entry = {}
+			entry['code'] = row[0].code
 			entry['name'] = row[1].name
 			entry['share'] = row[1].share
 			entry['company'] = row[0].name

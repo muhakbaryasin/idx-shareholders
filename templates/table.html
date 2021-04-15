@@ -93,11 +93,13 @@
 								<td>` + (no++) +`.</td>
 								<td>`+ data.data[i].name +`</td>
 								<td>`+ data.data[i].share +`</td>
-								<td>`+ data.data[i].company +`</td>
+								<td>` + data.data[i].company +`<p style="color: #aaa;"> [`+ data.data[i].code+ `]</p></td>
 							</tr>
 						`
 					}
-					page++;
+					
+					if (data && data.data && data.data.length >= 10)
+						page++;
 				});
 			}
 			

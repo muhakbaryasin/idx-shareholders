@@ -6,6 +6,7 @@ class BaseResponse(object):
 	data = None
 
 data_fields = {
+	'code': fields.String,
     'name': fields.String,
     'share': fields.String,
     'company': fields.String,
