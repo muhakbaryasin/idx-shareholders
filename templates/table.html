@@ -97,6 +97,7 @@
 							</tr>
 						`
 					}
+					page++;
 				});
 			}
 			
@@ -106,6 +107,10 @@
 			});
 			
 			$( "#load2" ).click(function() {
+				loadMore()
+			});
+			
+			$( document ).ready(function() {
 				loadMore()
 			});
 		</script>
