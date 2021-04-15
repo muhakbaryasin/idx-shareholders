@@ -27,6 +27,7 @@ def get_db_config_url():
 def session_manager():
     """provide a transactional scope around a series of operations."""
     session = Session()
+    
     try:
         yield session
     except:
@@ -35,7 +36,7 @@ def session_manager():
     finally:
         session.close()
 
-
-engine = create_engine(get_db_config_url(), connect_args={'connect_timeout': 1000}, pool_size=20, pool_pre_ping=True, pool_recycle=3600)
-# engine = create_engine('postgres://hypothesis-h-prod-db.us-west-1.rds.amazonaws.com:5432/h?keepalives_idle=60&keepalives_interval=60&keepalives_count=10', pool_size=5, max_overflow=2, timeout=30, use_lifo=False)
+engine = create_engine(get_db_config_url())
 Session = sessionmaker(bind=engine)
+
+

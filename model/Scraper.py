@@ -20,6 +20,9 @@ class Scraper(object):
 			self.setId(str(uuid.uuid4()))
 		
 	def setUrl(self, url):
+		if url is None:
+			return
+			
 		if type(url) is not str:
 			raise Exception("Url must be a string.")
 
@@ -43,7 +46,7 @@ class Scraper(object):
 	
 
 class WebDriver(Scraper):
-	def __init__(self, url, id=None):
+	def __init__(self, url=None, id=None):
 		Scraper.__init__(self, url, id=id)
 		options = Options()
 		options.set_headless(headless=False)
@@ -51,8 +54,9 @@ class WebDriver(Scraper):
 		if id is None:
 			self.session = webdriver.Firefox(firefox_options=options, executable_path='geckodriver')
 			#self.session = webdriver.Chrome(executable_path='chromedriver.exe')
-			print("get url -> {}".format(url))
-			self.session.get(url)
+		
+		if url is not None:
+			self.goto(url)
 			
 	
 	def selectOptionByValue(self, select_elmt, value):
@@ -77,6 +81,13 @@ class WebDriver(Scraper):
 	
 	def executeScript(self, script):
 		self.session.execute_script(script)
+	
+	def goto(self, url):
+		print("get url -> {}".format(url))
+		self.session.get(url)
+	
+	def quit(self):
+		self.session.quit()
 		
 
 class Rest(Scraper):
