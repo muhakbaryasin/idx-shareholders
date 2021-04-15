@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from flask_restful import Api
 from endpoints.Scraping import Scraping
+from endpoints.Shareholders import Shareholders
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import os
@@ -11,6 +12,7 @@ api = Api(app)
 RequestID(app)
 
 api.add_resource(Scraping, "/v1/scraping")
+api.add_resource(Shareholders, "/v1/shareholders")
 
 logname = "service.log"
 logger = logging.getLogger()
