@@ -1,46 +1,90 @@
 <html>
 	<head>
 		<style>
-		.custab{
-			border: 1px solid #ccc;
-			padding: 5px;
-			margin: 5% 0;
-			box-shadow: 3px 3px 2px #ccc;
-			transition: 0.5s;
-		}
-		
-		.custab:hover{
-			box-shadow: 3px 3px 0px transparent;
-			transition: 0.5s;
-		}
+		   body {
+        color: #404E67;
+        background: #F5F7FA;
+		font-family: 'Open Sans', sans-serif;
+	}
+	.table-wrapper {
+		width: 999px;
+		margin: 30px auto;
+        background: #fff;
+        padding: 20px;	
+        box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    }
+    .table-title {
+        padding-bottom: 10px;
+        margin: 0 0 10px;
+    }
+    .table-title h2 {
+        margin: 6px 0 0;
+        font-size: 22px;
+    }
+    .table-title .add-new {
+        float: right;
+		height: 30px;
+		font-weight: bold;
+		font-size: 12px;
+		text-shadow: none;
+		min-width: 100px;
+		border-radius: 50px;
+		line-height: 13px;
+    }
+	.table-title .add-new i {
+		margin-right: 4px;
+	}
+    
+    
+
 		</style>
-		<link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-		<script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
-		<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round|Open+Sans">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 	</head>
 	<body>
 		<div class="container">
-			<div class="row col-md-6 col-md-offset-2 custyle">
-			<table class="table table-striped custab">
-			<thead>
-			<input type="button" class="btn btn-primary btn-xs pull-right" id="load" value="+ Load more"/>
-				<tr>
-					<th>No.</th>
-					<th>Name</th>
-					<th>Share</th>
-					<th>Company</th>
-				</tr>
-			</thead>
-			<tbody id="result">
-			</tbody>
-			</table>
-			</div>
-		</div>
+        <div class="table-wrapper">
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-sm-8"><h2>Share <b>Holders</b></h2></div>
+                    <div class="col-sm-4">
+                        <button type="button" id="load" class="btn btn-info add-new"><i class="fa fa-plus"></i> Add New</button>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Name</th>
+                        <th>Share value</th>
+                        <th>Company</th>
+                    </tr>
+                </thead>
+                <tbody id="result">
+                    
+                </tbody>
+            </table>
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-sm-8"><h2>Share <b>Holders</b></h2></div>
+                    <div class="col-sm-4">
+                        <button type="button" id="load2" class="btn btn-info add-new"><i class="fa fa-plus"></i> Add New</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
 		<script>
 			let no = 1;
 			let page = 0;
 			
-			$( "#load" ).click(function() {
+			function loadMore() {
 				$.get( "v1/shareholders?page="+page, function( data ) {
 					for (let i = 0; i < data.data.length; i++) {
 						let el = document.getElementById("result"); 
@@ -54,6 +98,15 @@
 						`
 					}
 				});
+			}
+			
+			
+			$( "#load" ).click(function() {
+				loadMore()
+			});
+			
+			$( "#load2" ).click(function() {
+				loadMore()
 			});
 		</script>
 	</body>
