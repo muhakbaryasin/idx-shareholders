@@ -8,6 +8,7 @@
 ###### Run
 - install mysql client dev package of your OS
 - install packages that listed in requirements.txt
+- change username, password, db name of your own in db_config.ini
 - python main.py
 
 ###### Endpoints
