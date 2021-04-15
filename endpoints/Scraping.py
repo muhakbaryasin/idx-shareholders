@@ -5,6 +5,7 @@ from datetime import datetime
 from model.BaseResponse import BaseResponse, resource_fields
 from repo.CompanyRepository import CompanyRepository
 from model.Scraper import WebDriver
+from time import sleep
 
 
 class Scraping(Resource):
@@ -16,6 +17,7 @@ class Scraping(Resource):
 
 		idx_parser = IdxParser()
 		idx_parser.parse_companies()
+		idx_parser.quit()
 		
 		return response
 
@@ -23,6 +25,9 @@ class Scraping(Resource):
 class IdxParser(object):
 	def __init__(self):
 		self.wd = WebDriver()
+		
+	def quit(self):
+		self.wd.quit()
 	
 	def parse_companies(self):
 		stock_list_url = 'https://www.idx.co.id/umbraco/Surface/Helper/GetEmiten?emitenType=s'
@@ -35,7 +40,7 @@ class IdxParser(object):
 				stocks_with_listing_date_url + str( len( stock_list ) )
 			)
 		
-		# company_repo = CompanyRepository()
+		company_repo = CompanyRepository()
 			
 		for each_data in stocks_with_listing_date['data']:
 			company_entity = {}
@@ -51,14 +56,16 @@ class IdxParser(object):
 			marcap = 0 if marcap is None else int(marcap)
 			company_entity['market_capitalization'] = marcap
 			
-			# existing_company = company_repo.get_by_code(emiten_code)
+			existing_company = company_repo.get_by_code(emiten_code)
 			
-			#if existing_company is not None:
-			#	company_repo.update(company_entity)
-			#else:
-			#	company_repo.add(company_entity)
+			if existing_company is not None:
+				company_repo.update(company_entity)
+			else:
+				company_repo.add(company_entity)
 			
-			self.parseShareHolder(emiten_code, 0, marcap)
+			#self.parseShareHolder(emiten_code, 0, marcap)
+			break
+			sleep(3)
 	
 	
 	def parseShareHolder(self, emiten_code, company_id, marcap):

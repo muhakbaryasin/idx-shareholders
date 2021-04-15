@@ -3,7 +3,7 @@ from sqlalchemy import (
     Integer,
     DateTime,
     Text,
-    TIMESTAMP,
+    BigInteger
 )
 
 from db.meta import BaseEntity, Base
@@ -16,5 +16,6 @@ class Company(Base):
     name = Column(Text, nullable=False)
     code = Column(Text, nullable=False)
     listing_date = Column(DateTime, nullable=False)
-    create_date = Column(TIMESTAMP, default=func.now(), nullable=False)
-    update_date = Column(TIMESTAMP, default=func.now(), nullable=False)
+    market_capitalization = Column(BigInteger, nullable=False)
+    create_date = Column(DateTime, default=func.now(), nullable=False)
+    update_date = Column(DateTime, default=func.now(), nullable=False)
