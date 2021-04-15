@@ -24,6 +24,8 @@ class Scraping(Resource):
 			idx_parser.quit()
 			raise e
 		
+		idx_parser.quit()
+		
 		return response
 
 
