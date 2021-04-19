@@ -6,3 +6,5 @@ flask_log_request_id>=0.10.1
 mysqlclient==2.0.3
 PyMySQL==1.0.2
 selenium==3.141.0
+alembic==1.5.8
+symspellpy==6.7.0

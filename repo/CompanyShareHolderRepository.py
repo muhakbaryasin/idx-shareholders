@@ -1,19 +1,20 @@
 from sqlalchemy import inspect
 from sqlalchemy.orm.collections import InstrumentedList
 from db.session_manager import session_manager
-from db.ShareHolder import ShareHolder
 from db.Company import Company
+from db.ShareHolder import ShareHolder
 from db.CompanyShareHolder import CompanyShareHolder
 from datetime import datetime
 
 
-class ShareHolderRepository(object):
-	def __dict_to_shareholder__(self, entity):
-		return ShareHolder(**entity)
+class CompanyShareHolderRepository(object):
+	def __dict_to_companyshareholder__(self, entity):
+		return CompanyShareHolder(**entity)
 	
 	def add(self, entity):
 		with session_manager() as session:
-			entry = self.__dict_to_shareholder__(entity)
+			entry = self.__dict_to_companyshareholder__(entity)
+			entry.create_date = datetime.now()
 			session.add(entry)
 			session.commit()
 			session.refresh(entry)
@@ -23,12 +24,12 @@ class ShareHolderRepository(object):
 	def update(self, entry_update):
 		if type(entry_update) is dict:
 			entry_update.pop('update_date', None)
-			entry_update = ShareHolder(**entry_update)
+			entry_update = CompanyShareHolder(**entry_update)
 		
 		entry_update.update_date = datetime.now()
 		
 		with session_manager() as session:
-			entry = session.query(ShareHolder).filter(ShareHolder.id==entry_update.id).one_or_none() 
+			entry = session.query(CompanyShareHolder).filter(CompanyShareHolder.id==entry_update.id).one_or_none() 
 			
 			if entry is None:
 				return
@@ -37,6 +38,10 @@ class ShareHolderRepository(object):
 			
 			for column in mapper.attrs:
 				if type(entry.__getattribute__( column.key )) is InstrumentedList:
+					continue
+				if type(entry.__getattribute__( column.key )) is Company:
+					continue
+				if type(entry.__getattribute__( column.key )) is ShareHolder:
 					continue
 				
 				setattr(entry, column.key, entry_update.__getattribute__( column.key ))
@@ -48,28 +53,18 @@ class ShareHolderRepository(object):
 
 
 	def get(self, id):
+		import pdb; pdb.set_trace()
 		with session_manager() as session:
-			return session.query(ShareHolder).filter(ShareHolder.id==id).one_or_none()
+			return session.query(CompanyShareHolder).filter(CompanyShareHolder.id==id).one_or_none()
 	
-	def get_by_name(self, name):
+	def get(self, company_id, shareholder_id):
 		with session_manager() as session:
-			return session.query(ShareHolder).filter(ShareHolder.name==name).one_or_none()
+			return session.query(CompanyShareHolder).filter(CompanyShareHolder.company_id==company_id).filter(CompanyShareHolder.shareholder_id==shareholder_id).one_or_none()
 	
-	def get_paginate(self, page=0, page_size=10):
+	def get_by_shareholder_id(self, shareholder_id):
 		with session_manager() as session:
-			query = session.query(ShareHolder).order_by(ShareHolder.share.desc())
-			
-			if page_size:
-				query = query.limit(page_size)
-			if page: 
-				query = query.offset(page*page_size)
-			
-			return query.all()
+			return session.query(CompanyShareHolder).filter(CompanyShareHolder.shareholder_id==shareholder_id).all()
 	
-	def get_like_name(self, name):
-		with session_manager() as session:
-			return session.query(ShareHolder).filter(ShareHolder.name.like("%{}%".format(name))).all()
-    
 	def delete(self, id):
 		entry = self.get(id)
 		

@@ -5,8 +5,26 @@ from datetime import datetime
 from model.BaseResponse import BaseResponse, resource_fields
 from repo.CompanyRepository import CompanyRepository
 from repo.ShareHolderRepository import ShareHolderRepository
+from repo.CompanyShareHolderRepository import CompanyShareHolderRepository
 from model.Scraper import WebDriver
 from time import sleep
+from symspellpy import SymSpell, Verbosity
+
+
+class NameChecker(object):
+	def __init__(self, name_list):
+		self.sym_spell = SymSpell(max_dictionary_edit_distance=2, prefix_length=7)
+		
+		for each_name in name_list:
+			self.sym_spell.create_dictionary_entry(each_name, len(each_name.split(' ')))
+		
+	def get_name(self, name):
+		suggestions = self.sym_spell.lookup(name, Verbosity.CLOSEST, max_edit_distance=2, transfer_casing=True)
+		
+		if suggestions is not None and len(suggestions) > 0:
+			return suggestions[0].term
+		
+		return name
 
 
 class Scraping(Resource):
@@ -76,30 +94,79 @@ class IdxParser(object):
 			sleep(1)
 	
 	
+	def get_name_suggestion(self, name):
+		shareholder_repo = ShareHolderRepository()
+		name_suggestion_list = []
+		
+		for each_word in name.split(' '):
+			if each_word.upper() == 'PT' or each_word.upper() == 'TBK':
+				continue
+				
+				
+			for each_ in shareholder_repo.get_like_name(each_word):
+				if each_.name not in name_suggestion_list:
+					name_suggestion_list.append(each_.name)
+		
+		if len(name_suggestion_list) < 1:
+			return name
+		
+		try:
+			name_checker = NameChecker(name_suggestion_list)
+			return name_checker.get_name(name)
+		except:
+			return name
+	
+	
 	def parseShareHolder(self, emiten_code, company_id, marcap):
 		company_profile_detail_url = 'https://www.idx.co.id/umbraco/Surface/ListedCompany/GetCompanyProfilesDetail?emitenType=s&language=en-us&kodeEmiten='
 		company_profile_detail = self.retrieve_json( company_profile_detail_url + emiten_code )
 		
 		shareholder_repo = ShareHolderRepository()
+		company_shareholder_repo = CompanyShareHolderRepository()
 		
 		for each_share_holder in company_profile_detail['PemegangSaham']:
-			shareholder_entity = {}
-			shareholder_entity['company_id'] = company_id
+			if each_share_holder['Persentase'] > 100:
+				logging.warning('Sharholder {} at {} has {} percantage of market cap'.format(each_share_holder['Nama'], company_id, each_share_holder['Persentase']))
+				continue
 			
-			name = each_share_holder['Nama']
-			shareholder_entity['name'] = name
+			name = each_share_holder['Nama'].replace('.','')
+			sharevalue = int( marcap * float(each_share_holder['Persentase']) / 100 )
+			name = self.get_name_suggestion(name)
 			
+			existing_shareholder = shareholder_repo.get_by_name(name)
+			
+			if existing_shareholder is None:
+				shareholder_entity = {}
+				shareholder_entity['name'] = name
+				shareholder_entity['share'] = sharevalue
+				existing_shareholder = shareholder_repo.add(shareholder_entity)
+			
+			company_shareholder_entity = {}
+			company_shareholder_entity['company_id'] = company_id
+			company_shareholder_entity['shareholder_id'] = existing_shareholder.id
 			# why cant we just use the Jumlah?
-			#shareholder_entity['share'] = long(each_share_holder['Jumlah'])
-			shareholder_entity['share'] = int( marcap * float(each_share_holder['Persentase']) / 100 )
-			# print(shareholder_entity)
+			#company_shareholder_entity['share'] = int(each_share_holder['Jumlah'])
+			company_shareholder_entity['share'] = sharevalue
+			# print(company_shareholder_entity)
 			
-			existing_shareholder = shareholder_repo.get_by_name(company_id, name)
+			existing_company_shareholder = company_shareholder_repo.get(company_id, existing_shareholder.id)
 			
-			if existing_shareholder is not None:
-				shareholder_repo.update(existing_shareholder)
+			if existing_company_shareholder is not None:
+				company_shareholder_entity['id'] = existing_company_shareholder.id
+				company_shareholder_entity['create_date'] = existing_company_shareholder.create_date
+				company_shareholder_repo.update(company_shareholder_entity)
 			else:
-				shareholder_repo.add(shareholder_entity)
+				company_shareholder_repo.add(company_shareholder_entity)
+			
+			
+			shareholder_entity = {}
+			shareholder_entity['name'] = name
+			shareholder_entity['share'] = sum(each_.share for each_ in company_shareholder_repo.get_by_shareholder_id(existing_shareholder.id))
+			shareholder_entity['id'] = existing_shareholder.id
+			shareholder_entity['create_date'] = existing_shareholder.create_date
+			
+			shareholder_repo.update(shareholder_entity)
+			
 		
 	
 	def retrieve_json(self, url):
