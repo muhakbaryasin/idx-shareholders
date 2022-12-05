@@ -53,7 +53,6 @@ class CompanyShareHolderRepository(object):
 
 
 	def get(self, id):
-		import pdb; pdb.set_trace()
 		with session_manager() as session:
 			return session.query(CompanyShareHolder).filter(CompanyShareHolder.id==id).one_or_none()
 	

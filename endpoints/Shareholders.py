@@ -5,15 +5,13 @@ from model.BaseResponse import BaseResponse, resource_fields
 from repo.ShareHolderRepository import ShareHolderRepository
 from repo.CompanyShareHolderRepository import CompanyShareHolderRepository
 from repo.CompanyRepository import CompanyRepository
-
-shareholders_get_args = reqparse.RequestParser()
-shareholders_get_args.add_argument("page", type=int, required=False)
+from flask import request
 
 
 class Shareholders(Resource):
 	@marshal_with(resource_fields)
 	def get(self):
-		args_ = shareholders_get_args.parse_args()
+		args_ = request.args
 		page = args_['page']
 		
 		if page is None:
@@ -23,8 +21,6 @@ class Shareholders(Resource):
 		company_shareholder_repo = CompanyShareHolderRepository()
 		company_repo = CompanyRepository()
 		result = repo.get_paginate(page=page)
-		
-		
 		
 		result_list = []
 		

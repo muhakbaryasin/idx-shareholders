@@ -6,6 +6,7 @@ from selenium.webdriver.firefox.options import Options
 import uuid
 import pickle
 
+
 class Scraper(object):
 	def __init__(self, url, id=None):
 		self.session = None
@@ -52,7 +53,7 @@ class WebDriver(Scraper):
 		options.set_headless(headless=True)
 		
 		if id is None:
-			self.session = webdriver.Firefox(firefox_options=options, executable_path='geckodriver')
+			self.session = webdriver.Firefox(firefox_options=options, executable_path='/home/akbar/geckodriver')
 			#self.session = webdriver.Chrome(executable_path='chromedriver.exe')
 		
 		if url is not None:

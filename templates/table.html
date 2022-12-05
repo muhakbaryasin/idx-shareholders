@@ -41,7 +41,7 @@
 		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-		
+
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round|Open+Sans">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -83,35 +83,39 @@
 		<script>
 			let no = 1;
 			let page = 0;
-			
+
 			function loadMore() {
-				$.get( "v1/shareholders?page="+page, function( data ) {
-					for (let i = 0; i < data.data.length; i++) {
-						let el = document.getElementById("result"); 
-						el.innerHTML = el.innerHTML + 
-						`	<tr>
-								<td>` + (no++) +`.</td>
-								<td>`+ data.data[i].name +`</td>
-								<td>`+ data.data[i].share +`</td>
-								<td>[`+ data.data[i].code+ `]</td>
-							</tr>
-						`
-					}
-					
-					if (data && data.data && data.data.length >= 10)
-						page++;
-				});
+			    $.ajax({
+			        url: "v1/shareholders?page="+page,
+			        success: function(data) {
+                        for (let i = 0; i < data.data.length; i++) {
+                            let el = document.getElementById("result");
+                            el.innerHTML = el.innerHTML +
+                            `	<tr>
+                                    <td>` + (no++) +`.</td>
+                                    <td>`+ data.data[i].name +`</td>
+                                    <td>`+ data.data[i].share +`</td>
+                                    <td>[`+ data.data[i].code+ `]</td>
+                                </tr>
+                            `
+                        }
+
+                        if (data && data.data && data.data.length >= 10)
+                            page++;
+
+                    }
+                });
 			}
-			
-			
+
+
 			$( "#load" ).click(function() {
 				loadMore()
 			});
-			
+
 			$( "#load2" ).click(function() {
 				loadMore()
 			});
-			
+
 			$( document ).ready(function() {
 				loadMore()
 			});
